@@ -47,6 +47,10 @@ int fitness_score(int n, const vector<int> &individual)
                 continue;
             }
 
+            // two queens are attacking each other if they are:
+            // 1 - in the same column
+            // 2 - on the same diagonal
+
             int x1 = i;
             int x2 = j;
             int y1 = individual[i];
@@ -59,13 +63,14 @@ int fitness_score(int n, const vector<int> &individual)
         }
     }
 
+    // we counted each occasion twice
     return res / 2;
 }
 
 pair<vector<int>, vector<int>> crossover(int n, vector<int> parent1, vector<int> parent2)
 {
     // random pivoting point
-    int crossover_point = rand() % n;
+    int crossover_point = get_random(0, n - 1);
 
     vector<int> child1(parent1.begin(), parent1.begin() + crossover_point);
     child1.insert(child1.end(), parent2.begin() + crossover_point, parent2.end());
@@ -73,17 +78,17 @@ pair<vector<int>, vector<int>> crossover(int n, vector<int> parent1, vector<int>
     vector<int> child2(parent2.begin(), parent2.begin() + crossover_point);
     child2.insert(child2.end(), parent1.begin() + crossover_point, parent1.end());
 
-    // mutation - 70% chance of random change in child
-    if (static_cast<double>(rand()) / RAND_MAX > 0.3)
+    // mutation - 70% chance of a random change in the child
+    if (get_random(1, 10) <= 7)
     {
-        int mutation_point = rand() % n;
-        child1[mutation_point] = rand() % n;
+        int mutation_point = get_random(0, n - 1);
+        child1[mutation_point] = get_random(0, n - 1);
     }
 
-    if (static_cast<double>(rand()) / RAND_MAX > 0.3)
+    if (get_random(1, 10) <= 7)
     {
-        int mutation_point = rand() % n;
-        child2[mutation_point] = rand() % n;
+        int mutation_point = get_random(0, n - 1);
+        child2[mutation_point] = get_random(0, n - 1);
     }
 
     return make_pair(child1, child2);

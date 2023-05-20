@@ -1,0 +1,16 @@
+1.
+BOARD SIZE 8
+POPULATION SIZE 50
+ide dosta brzo
+2.
+BOARD SIZE 8
+POPULATION SIZE 100
+zavrsi u ranim fazama zbog velicine populacije (uglavnom do ~20 generacija)
+3.
+BOARD SIZE 8
+POPULATION SIZE 500
+-||-
+4.
+BOARD SIZE 20
+POPULATION SIZE 100
+do 10 sekundi

@@ -5,6 +5,7 @@
 #include <iostream>
 
 #define POPULATION_SIZE 50
+#define BOARD_SIZE 8
 
 using namespace std;
 
@@ -23,10 +24,10 @@ vector<vector<int>> init(int n, int population_size)
     for (int i = 0; i < population_size; i++)
     {
         vector<int> individual;
-        for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
         {
-            int gen = rand() % n;
-            individual.push_back(gen);
+            int genome = get_random(0, n - 1);
+            individual.push_back(genome);
         }
 
         population.push_back(individual);
@@ -34,7 +35,7 @@ vector<vector<int>> init(int n, int population_size)
     return population;
 }
 
-int fitness_score(int n, vector<int> individual)
+int fitness_score(int n, const vector<int> &individual)
 {
     int res = 0;
     for (int i = 0; i < n; i++)
@@ -45,24 +46,19 @@ int fitness_score(int n, vector<int> individual)
             {
                 continue;
             }
+
             int x1 = i;
             int x2 = j;
             int y1 = individual[i];
             int y2 = individual[j];
 
             if (y1 == y2)
-            {
                 res++;
-            }
-            else
-            {
-                if (abs(x1 - x2) == abs(y1 - y2))
-                {
-                    res++;
-                }
-            }
+            else if (abs(x1 - x2) == abs(y1 - y2))
+                res++;
         }
     }
+
     return res / 2;
 }
 

@@ -4,16 +4,25 @@
 #include <algorithm>
 #include <iostream>
 
-#define POPULATION_SIZE 50
+// population size has to be even
+#define POPULATION_SIZE 100
 #define BOARD_SIZE 8
 
 using namespace std;
 
-int get_random(int min, int max)
+random_device device;
+mt19937 rng(device());
+
+int get_random_int(int min, int max)
 {
-    static random_device device;
-    static mt19937 rng(device());
     uniform_int_distribution<mt19937::result_type> dist(min, max);
+
+    return dist(rng);
+}
+
+double get_random_real(double min, double max)
+{
+    uniform_real_distribution<double> dist(min, max);
 
     return dist(rng);
 }
@@ -26,7 +35,7 @@ vector<vector<int>> init(int n, int population_size)
         vector<int> individual;
         for (int j = 0; j < n; j++)
         {
-            int genome = get_random(0, n - 1);
+            int genome = get_random_int(0, n - 1);
             individual.push_back(genome);
         }
 
@@ -70,7 +79,7 @@ int fitness_score(int n, const vector<int> &individual)
 pair<vector<int>, vector<int>> crossover(int n, vector<int> parent1, vector<int> parent2)
 {
     // random pivoting point
-    int crossover_point = get_random(0, n - 1);
+    int crossover_point = get_random_int(0, n - 1);
 
     vector<int> child1(parent1.begin(), parent1.begin() + crossover_point);
     child1.insert(child1.end(), parent2.begin() + crossover_point, parent2.end());
@@ -79,69 +88,20 @@ pair<vector<int>, vector<int>> crossover(int n, vector<int> parent1, vector<int>
     child2.insert(child2.end(), parent1.begin() + crossover_point, parent1.end());
 
     // mutation - 70% chance of a random change in the child
-    if (get_random(1, 10) <= 7)
+    if (get_random_int(1, 10) <= 7)
     {
-        int mutation_point = get_random(0, n - 1);
-        child1[mutation_point] = get_random(0, n - 1);
+        int mutation_point = get_random_int(0, n - 1);
+        child1[mutation_point] = get_random_int(0, n - 1);
     }
 
-    if (get_random(1, 10) <= 7)
+    if (get_random_int(1, 10) <= 7)
     {
-        int mutation_point = get_random(0, n - 1);
-        child2[mutation_point] = get_random(0, n - 1);
+        int mutation_point = get_random_int(0, n - 1);
+        child2[mutation_point] = get_random_int(0, n - 1);
     }
 
     return make_pair(child1, child2);
 }
-
-bool compare(const pair<vector<int>, double> &p1, const pair<vector<int>, double> &p2)
-{
-    return p1.second * rand() < p2.second * rand();
-}
-
-// pair<vector<int>, int> genetic2(int n, int population_size) {
-//     int generation = 0;
-//     int counter = 0;
-//
-//     auto population = init(n, population_size);
-//
-//     vector<int> population_scores;
-//     for (const auto& ind : population) {
-//         int score = fitness_score(n, ind);
-//         population_scores.push_back(score);
-//     }
-//
-//     vector<pair<vector<int>, double>> population_zipped;
-//     for (int i = 0; i < population.size(); ++i) {
-//         population_zipped.push_back(std::make_pair(population[i], population_scores[i]));
-//     }
-//
-//     while (true)
-//     {
-//         counter++;
-//         vector<vector<int>> children;
-//         for (int i = 0; i < population_size/2; i++)
-//         {
-//             sort(population_zipped.begin(), population_zipped.end(), compare);
-//             vector<int> child1, child2;
-//             tie(child1, child2) = crossover(n, population_zipped[0][0], population_zipped[1][0]);
-//             children.push_back(child1);
-//             children.push_back(child2);
-//         }
-//         generation++;
-//
-//         int elitism_deg = population_size*0.05;
-//
-//         vector<int> children_scores;
-//         for (const auto& ind : children) {
-//             int score = fitness_score(n, ind);
-//             population_scores.push_back(score);
-//         }
-//
-//
-//     }
-//
-// }
 
 pair<vector<int>, int> genetic(int n, int population_size)
 {
@@ -163,11 +123,14 @@ pair<vector<int>, int> genetic(int n, int population_size)
         for (int i = 0; i < population_size / 2; i++)
         {
             // sortiranje po prilagodjenosti - selekcija
-            sort(population_scores.begin(), population_scores.end(), [](const pair<vector<int>, int> &ind1, const pair<vector<int>, int> &ind2)
-                 { return ind1.second * rand() / RAND_MAX < ind2.second * rand() / RAND_MAX; });
+            vector<pair<vector<int>, double>> population_scores_roulette;
+            transform(population_scores.begin(), population_scores.end(), back_inserter(population_scores_roulette), [&](pair<vector<int>, int> &ind)
+                      { return make_pair(ind.first, ind.second * get_random_real(0.0, 1.0)); });
+            sort(population_scores_roulette.begin(), population_scores_roulette.end(), [](const pair<vector<int>, double> &ind1, const pair<vector<int>, double> &ind2)
+                 { return ind1.second < ind2.second; });
 
             vector<int> child1, child2;
-            tie(child1, child2) = crossover(n, population_scores[0].first, population_scores[1].first);
+            tie(child1, child2) = crossover(n, population_scores_roulette[0].first, population_scores_roulette[1].first);
             children.push_back(child1);
             children.push_back(child2);
         }
@@ -223,13 +186,10 @@ void print_vector(vector<int> vec)
 
 int main()
 {
-    int n;
-    cout << "Unesite n" << endl;
-    cin >> n;
-
     int generations;
     vector<int> optimal_solution;
-    tie(optimal_solution, generations) = genetic(n, POPULATION_SIZE);
+
+    tie(optimal_solution, generations) = genetic(BOARD_SIZE, POPULATION_SIZE);
 
     cout << "Broj generacija: " << generations << endl;
     cout << "Resenje: ";

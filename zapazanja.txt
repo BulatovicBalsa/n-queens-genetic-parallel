@@ -14,3 +14,15 @@ POPULATION SIZE 500
 BOARD SIZE 20
 POPULATION SIZE 100
 do 10 sekundi
+5.
+BOARD SIZE 20
+POPULATION SIZE 500
+do 30 sekundi
+6.
+BOARD SIZE 40
+POPULATION SIZE 500
+uglavnom do 40 sekundi, ali desi se i do 120
+7.
+BOARD SIZE 50
+POPULATION SIZE 500
+uglavnom do 60 sekundi, ali desi se i do 220

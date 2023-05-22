@@ -25,3 +25,5 @@ pair<vector<int>, vector<int>> crossover(int n, vector<int> parent1, vector<int>
 vector<pair<vector<int>, int>> next_generation(vector<pair<vector<int>, int>> &population_scores, int start, int end, int n);
 
 pair<vector<int>, int> genetic_parallel(int n, int population_size);
+
+pair<vector<int>, int> genetic_serial(int n, int population_size);

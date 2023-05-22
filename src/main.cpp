@@ -26,7 +26,20 @@ int main()
     print_vector(optimal_solution);
 
     auto duration = chrono::duration_cast<chrono::seconds>(stop - start);
-    cout << "Vreme izvrsavanja: " << duration.count() << "s" << endl;
+    cout << "Vreme izvrsavanja paralelnog algoritma: " << duration.count() << "s" << endl;
+    cout << "Vreme po generaciji paralelnog algoritma: " << duration.count() / (generations * 1.0) << "s" << endl;
+
+    start = chrono::high_resolution_clock::now();
+    tie(optimal_solution, generations) = genetic_serial(BOARD_SIZE, POPULATION_SIZE);
+    stop = chrono::high_resolution_clock::now();
+
+    cout << "Broj generacija: " << generations << endl;
+    cout << "Resenje: ";
+    print_vector(optimal_solution);
+
+    duration = chrono::duration_cast<chrono::seconds>(stop - start);
+    cout << "Vreme izvrsavanja serijskog algoritma: " << duration.count() << "s" << endl;
+    cout << "Vreme po generaciji serijskog algoritma: " << duration.count() / (generations * 1.0) << "s" << endl;
 
     return 0;
 }

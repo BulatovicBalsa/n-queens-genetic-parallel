@@ -187,3 +187,76 @@ pair<vector<int>, int> genetic_parallel(int n, int population_size)
                   { return ind; });
     }
 }
+
+pair<vector<int>, int> genetic_serial(int n, int population_size)
+{
+    int generation = 0;
+    int counter = 0;
+
+    // inicijalizacija - kodiranje jedinki
+    vector<vector<int>> population = init(n, population_size);
+    // skladistimo fitness_score negde pa zip
+    vector<pair<vector<int>, int>> population_scores(population.size());
+    parallel_for(size_t(0), population.size(), [&](size_t i)
+                 { population_scores[i] = make_pair(population[i], fitness_score(n, population[i])); });
+    // transform(population.begin(), population.end(), back_inserter(population_scores), [&](vector<int> &ind)
+    //           { return make_pair(ind, fitness_score(n, ind)); });
+
+    while (true)
+    {
+        counter += 1;
+        // pravljenje dece - ukrstanje
+        vector<vector<int>> children;
+        for (int i = 0; i < population_size / 2; i++)
+        {
+            // sortiranje po prilagodjenosti - selekcija
+            vector<pair<vector<int>, double>> population_scores_roulette;
+            transform(population_scores.begin(), population_scores.end(), back_inserter(population_scores_roulette), [&](pair<vector<int>, int> &ind)
+                      { return make_pair(ind.first, ind.second * get_random_real(0.0, 1.0)); });
+            sort(population_scores_roulette.begin(), population_scores_roulette.end(), [](const pair<vector<int>, double> &ind1, const pair<vector<int>, double> &ind2)
+                 { return ind1.second < ind2.second; });
+
+            vector<int> child1, child2;
+            tie(child1, child2) = crossover(n, population_scores_roulette[0].first, population_scores_roulette[1].first);
+            children.push_back(child1);
+            children.push_back(child2);
+        }
+
+        generation += 1;
+
+        // pustamo 5% najboljih roditelja da prezive - elitizam
+        int elitism_deg = population_size * 0.05;
+
+        vector<pair<vector<int>, int>> children_scores;
+        transform(children.begin(), children.end(), back_inserter(children_scores), [&](vector<int> &ind)
+                  { return make_pair(ind, fitness_score(n, ind)); });
+        sort(children_scores.begin(), children_scores.end(), [](const pair<vector<int>, int> &ind1, const pair<vector<int>, int> &ind2)
+             { return ind1.second < ind2.second; });
+        sort(population_scores.begin(), population_scores.end(), [](const pair<vector<int>, int> &ind1, const pair<vector<int>, int> &ind2)
+             { return ind1.second < ind2.second; });
+
+        for (int i = 0; i < elitism_deg; i++)
+        {
+            if (children_scores[children_scores.size() - i - 1].second > population_scores[i].second)
+            {
+                swap(children_scores[children_scores.size() - i - 1], population_scores[i]);
+            }
+        }
+
+        sort(children_scores.begin(), children_scores.end(), [](const pair<vector<int>, int> &ind1, const pair<vector<int>, int> &ind2)
+             { return ind1.second < ind2.second; });
+        int best_child = children_scores[0].second;
+        cout << "\r" << counter << ". " << best_child << flush;
+        if (best_child == 0)
+        {
+            cout << endl;
+            return make_pair(children_scores[0].first, generation);
+        }
+
+        transform(children_scores.begin(), children_scores.end(), population_scores.begin(), [](const pair<vector<int>, int> &ind)
+                  { return ind; });
+
+        // clear children to avoid reallocating memory
+        children.clear();
+    }
+}

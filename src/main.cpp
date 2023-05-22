@@ -1,13 +1,16 @@
 #include <vector>
-#include <random>
 #include <tuple>
 #include <algorithm>
 #include <iostream>
 #include <chrono>
+
 #include "tbb/task_group.h"
 #include "tbb/parallel_for.h"
 #include "tbb/blocked_range.h"
 #include "tbb/concurrent_vector.h"
+
+#include "globals.hpp"
+#include "utils.hpp"
 
 // population size has to be even
 #define POPULATION_SIZE 500
@@ -15,23 +18,6 @@
 
 using namespace std;
 using namespace tbb;
-
-random_device device;
-mt19937 rng(device());
-
-int get_random_int(int min, int max)
-{
-    uniform_int_distribution<mt19937::result_type> dist(min, max);
-
-    return dist(rng);
-}
-
-double get_random_real(double min, double max)
-{
-    uniform_real_distribution<double> dist(min, max);
-
-    return dist(rng);
-}
 
 vector<vector<int>> init(int n, int population_size)
 {
@@ -217,16 +203,6 @@ pair<vector<int>, int> genetic(int n, int population_size)
         transform(children_scores.begin(), children_scores.end(), population_scores.begin(), [](const pair<vector<int>, int> &ind)
                   { return ind; });
     }
-}
-
-void print_vector(vector<int> vec)
-{
-    for (int i = 0; i < vec.size(); ++i)
-    {
-        cout << vec[i] << " ";
-    }
-
-    cout << endl;
 }
 
 int main()

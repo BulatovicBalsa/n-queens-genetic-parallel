@@ -50,24 +50,30 @@ int fitness_score(int n, const vector<int> &individual)
 }
 
 // mora biti parno
-int get_group_size(int n)
+int get_group_size(int n, int population_size)
 {
-    if (n < 16)
+    if (population_size <= 500)
     {
-        return 20;
-    }
-    else if (n < 30)
-    {
-        return 10;
-    }
-    else if (n <= 60)
-    {
-        // 8-30, 6 za 1000 populaciju
-        return 20;
+        if (n <= 60)
+        {
+            // 8-30, 6 za 1000 populaciju
+            return 20;
+        }
+        else
+        {
+            return 10;
+        }
     }
     else
     {
-        return 6;
+        if (n <= 60)
+        {
+            return 10;
+        }
+        else
+        {
+            return 6;
+        }
     }
 }
 
@@ -131,7 +137,7 @@ vector<pair<vector<int>, int>> next_generation(vector<pair<vector<int>, int>> po
 
 pair<vector<int>, int> genetic_parallel(int n, int population_size)
 {
-    int group_size = get_group_size(n);
+    int group_size = get_group_size(n, population_size);
     int generation = 0;
 
     // inicijalizacija - kodiranje jedinki

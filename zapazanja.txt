@@ -26,3 +26,14 @@ uglavnom do 40 sekundi, ali desi se i do 120
 BOARD SIZE 50
 POPULATION SIZE 500
 uglavnom do 60 sekundi, ali desi se i do 220
+
+
+za BOARD SIZE 20, dobije se ubrzanje 5
+
+za BOARD SIZE 60, ako se group_size (cutoff) poveca sa 2 na 4 ubrzanje se poveca sa 2 na 3
+                  ako se poveca sa 4 na 8 ubrzanje se jos poveca na ~4
+                  ako se poveca sa 8 na 10 onda se ubrzanje malo smanji
+                  na 6 se uspori
+                  => najbolje na 8
+
+ako se poveca population size na 1000, sve je dosta sporije ali je ubrzanje ~4

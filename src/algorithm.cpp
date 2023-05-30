@@ -49,23 +49,31 @@ int fitness_score(int n, const vector<int> &individual)
     return res / 2;
 }
 
-int get_group_size(int n)
+// mora biti parno
+int get_group_size(int n, int population_size)
 {
-    if (n < 16)
+    if (population_size <= 500)
     {
-        return 20;
-    }
-    else if (n < 30)
-    {
-        return 10;
-    }
-    else if (n < 60)
-    {
-        return 5;
+        if (n <= 60)
+        {
+            // 8-30, 6 za 1000 populaciju
+            return 20;
+        }
+        else
+        {
+            return 10;
+        }
     }
     else
     {
-        return 1;
+        if (n <= 60)
+        {
+            return 10;
+        }
+        else
+        {
+            return 6;
+        }
     }
 }
 
@@ -96,11 +104,11 @@ pair<vector<int>, vector<int>> crossover(int n, vector<int> parent1, vector<int>
     return make_pair(child1, child2);
 }
 
-vector<pair<vector<int>, int>> next_generation(vector<pair<vector<int>, int>> &population_scores, int start, int end, int n)
+vector<pair<vector<int>, int>> next_generation(vector<pair<vector<int>, int>> population_scores, int start, int end, int n)
 {
     vector<vector<int>> children;
     end = (population_scores.size() < end ? population_scores.size() : end);
-    for (int i = start; i < end; i++)
+    for (int i = 0; i < (end - start) / 2; i++)
     {
         // sortiranje po prilagodjenosti - selekcija
         vector<pair<vector<int>, double>> population_scores_roulette;
@@ -129,7 +137,7 @@ vector<pair<vector<int>, int>> next_generation(vector<pair<vector<int>, int>> &p
 
 pair<vector<int>, int> genetic_parallel(int n, int population_size)
 {
-    int group_size = get_group_size(n);
+    int group_size = get_group_size(n, population_size);
     int generation = 0;
 
     // inicijalizacija - kodiranje jedinki
@@ -147,22 +155,22 @@ pair<vector<int>, int> genetic_parallel(int n, int population_size)
         generation++;
         concurrent_vector<vector<pair<vector<int>, int>>> parallel_res;
 
-        parallel_for(blocked_range<int>(0, population_size), [&](blocked_range<int> range)
-                     {
-                    for(int i = range.begin(); i < range.end(); i+=group_size) {
-                        g.run([&] { parallel_res.push_back(next_generation(population_scores, i, i + group_size, n));});
-                    } });
+        for (int i = 0; i < population_size; i += group_size)
+        {
+            g.run([=, &parallel_res]
+                  { parallel_res.push_back(next_generation(population_scores, i, i + group_size, n)); });
+        }
         g.wait();
 
         vector<pair<vector<int>, int>> children_scores;
 
         for (int i = 0; i < parallel_res.size(); ++i)
         {
-            children_scores.insert(children_scores.end(), make_move_iterator(parallel_res[i].begin()), make_move_iterator(parallel_res[i].end()));
+            children_scores.insert(children_scores.end(), parallel_res[i].begin(), parallel_res[i].end());
         }
 
-        sort(population_scores.begin(), population_scores.end(), [](const pair<vector<int>, int> &ind1, const pair<vector<int>, int> &ind2)
-             { return ind1.second < ind2.second; });
+        parallel_sort(population_scores.begin(), population_scores.end(), [](const pair<vector<int>, int> &ind1, const pair<vector<int>, int> &ind2)
+                      { return ind1.second < ind2.second; });
         // pustamo 5% najboljih roditelja da prezive - elitizam
         int elitism_deg = population_size * 0.05;
         for (int i = 0; i < elitism_deg; i++)
@@ -173,10 +181,11 @@ pair<vector<int>, int> genetic_parallel(int n, int population_size)
             }
         }
 
-        sort(children_scores.begin(), children_scores.end(), [](const pair<vector<int>, int> &ind1, const pair<vector<int>, int> &ind2)
-             { return ind1.second < ind2.second; });
+        parallel_sort(children_scores.begin(), children_scores.end(), [](const pair<vector<int>, int> &ind1, const pair<vector<int>, int> &ind2)
+                      { return ind1.second < ind2.second; });
         int best_child = children_scores[0].second;
-        cout << "\r" << generation << ". " << best_child << flush;
+        if (ECHO)
+            cout << "\r" << generation << ". " << best_child << flush;
         if (best_child == 0)
         {
             cout << endl;
@@ -246,7 +255,8 @@ pair<vector<int>, int> genetic_serial(int n, int population_size)
         sort(children_scores.begin(), children_scores.end(), [](const pair<vector<int>, int> &ind1, const pair<vector<int>, int> &ind2)
              { return ind1.second < ind2.second; });
         int best_child = children_scores[0].second;
-        cout << "\r" << counter << ". " << best_child << flush;
+        if (ECHO)
+            cout << "\r" << counter << ". " << best_child << flush;
         if (best_child == 0)
         {
             cout << endl;

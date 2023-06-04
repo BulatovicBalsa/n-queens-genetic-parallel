@@ -77,6 +77,12 @@ int get_group_size(int n, int population_size)
     }
 }
 
+void mutate(vector<int> &child, int n)
+{
+    int mutation_point = get_random_int(0, n - 1);
+    child[mutation_point] = get_random_int(0, n - 1);
+}
+
 pair<vector<int>, vector<int>> crossover(int n, vector<int> parent1, vector<int> parent2)
 {
     // random pivoting point
@@ -91,14 +97,12 @@ pair<vector<int>, vector<int>> crossover(int n, vector<int> parent1, vector<int>
     // mutation - 70% chance of a random change in the child
     if (get_random_int(1, 10) <= 7)
     {
-        int mutation_point = get_random_int(0, n - 1);
-        child1[mutation_point] = get_random_int(0, n - 1);
+        mutate(child1, n);
     }
 
     if (get_random_int(1, 10) <= 7)
     {
-        int mutation_point = get_random_int(0, n - 1);
-        child2[mutation_point] = get_random_int(0, n - 1);
+        mutate(child2, n);
     }
 
     return make_pair(child1, child2);
@@ -205,11 +209,9 @@ pair<vector<int>, int> genetic_serial(int n, int population_size)
     // inicijalizacija - kodiranje jedinki
     vector<vector<int>> population = init(n, population_size);
     // skladistimo fitness_score negde pa zip
-    vector<pair<vector<int>, int>> population_scores(population.size());
-    parallel_for(size_t(0), population.size(), [&](size_t i)
-                 { population_scores[i] = make_pair(population[i], fitness_score(n, population[i])); });
-    // transform(population.begin(), population.end(), back_inserter(population_scores), [&](vector<int> &ind)
-    //           { return make_pair(ind, fitness_score(n, ind)); });
+    vector<pair<vector<int>, int>> population_scores;
+    transform(population.begin(), population.end(), back_inserter(population_scores), [&](vector<int> &ind)
+              { return make_pair(ind, fitness_score(n, ind)); });
 
     while (true)
     {

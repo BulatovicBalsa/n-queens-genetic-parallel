@@ -175,7 +175,7 @@ pair<vector<int>, int> genetic_parallel(int n, int population_size)
 
         parallel_sort(population_scores.begin(), population_scores.end(), [](const pair<vector<int>, int> &ind1, const pair<vector<int>, int> &ind2)
                       { return ind1.second < ind2.second; });
-        // pustamo 5% najboljih roditelja da prezive - elitizam
+        // we let 5% of the best parents live on - elitism
         int elitism_deg = population_size * 0.05;
         for (int i = 0; i < elitism_deg; i++)
         {
@@ -235,7 +235,7 @@ pair<vector<int>, int> genetic_serial(int n, int population_size)
 
         generation += 1;
 
-        // pustamo 5% najboljih roditelja da prezive - elitizam
+        // we let 5% of the best parents live on - elitism
         int elitism_deg = population_size * 0.05;
 
         vector<pair<vector<int>, int>> children_scores;

@@ -12,7 +12,7 @@
 
 #include "utils.hpp"
 
-#define ECHO false
+#define ECHO true
 
 using namespace std;
 using namespace tbb;
@@ -21,7 +21,7 @@ vector<vector<int>> init(int n, int population_size);
 
 int fitness_score(int n, const vector<int> &individual);
 
-int get_group_size(int n);
+int get_group_size(int n, int population_size);
 
 pair<vector<int>, vector<int>> crossover(int n, vector<int> parent1, vector<int> parent2);
 

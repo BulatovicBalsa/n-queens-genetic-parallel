@@ -49,14 +49,14 @@ int fitness_score(int n, const vector<int> &individual)
     return res / 2;
 }
 
-// mora biti parno
+// population size has to be even
 int get_group_size(int n, int population_size)
 {
     if (population_size <= 500)
     {
         if (n <= 60)
         {
-            // 8-30, 6 za 1000 populaciju
+            // 8-30, 6 for population 1000 
             return 20;
         }
         else
@@ -114,7 +114,7 @@ vector<pair<vector<int>, int>> next_generation(vector<pair<vector<int>, int>> po
     end = (population_scores.size() < end ? population_scores.size() : end);
     for (int i = 0; i < (end - start) / 2; i++)
     {
-        // sortiranje po prilagodjenosti - selekcija
+        // sort by fitness - selection
         vector<pair<vector<int>, double>> population_scores_roulette;
         transform(population_scores.begin(), population_scores.end(), back_inserter(population_scores_roulette), [&](pair<vector<int>, int> &ind)
                   { return make_pair(ind.first, ind.second * get_random_real(0.0, 1.0)); });
@@ -144,14 +144,13 @@ pair<vector<int>, int> genetic_parallel(int n, int population_size)
     int group_size = get_group_size(n, population_size);
     int generation = 0;
 
-    // inicijalizacija - kodiranje jedinki
+    // initialization - individuals coding
     vector<vector<int>> population = init(n, population_size);
-    // skladistimo fitness_score negde pa zip
+    // storing fitness_score with individual
     vector<pair<vector<int>, int>> population_scores(population.size());
     parallel_for(size_t(0), population.size(), [&](size_t i)
                  { population_scores[i] = make_pair(population[i], fitness_score(n, population[i])); });
-    // transform(population.begin(), population.end(), back_inserter(population_scores), [&](vector<int> &ind)
-    //           { return make_pair(ind, fitness_score(n, ind)); });
+
     task_group g;
 
     while (true)
@@ -206,9 +205,9 @@ pair<vector<int>, int> genetic_serial(int n, int population_size)
     int generation = 0;
     int counter = 0;
 
-    // inicijalizacija - kodiranje jedinki
+    // initialization - individuals coding
     vector<vector<int>> population = init(n, population_size);
-    // skladistimo fitness_score negde pa zip
+    // storing fitness_score with individual
     vector<pair<vector<int>, int>> population_scores;
     transform(population.begin(), population.end(), back_inserter(population_scores), [&](vector<int> &ind)
               { return make_pair(ind, fitness_score(n, ind)); });
@@ -216,11 +215,11 @@ pair<vector<int>, int> genetic_serial(int n, int population_size)
     while (true)
     {
         counter += 1;
-        // pravljenje dece - ukrstanje
+        // making children - crossing
         vector<vector<int>> children;
         for (int i = 0; i < population_size / 2; i++)
         {
-            // sortiranje po prilagodjenosti - selekcija
+            // sort by fitness - selection
             vector<pair<vector<int>, double>> population_scores_roulette;
             transform(population_scores.begin(), population_scores.end(), back_inserter(population_scores_roulette), [&](pair<vector<int>, int> &ind)
                       { return make_pair(ind.first, ind.second * get_random_real(0.0, 1.0)); });

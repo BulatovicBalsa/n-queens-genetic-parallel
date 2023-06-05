@@ -196,8 +196,7 @@
 			mutate(child2, n);
 			
 			return make_pair(child1, child2);
-		}
-	\end{lstlisting}
+		}\end{lstlisting}
 	
 	\subsection{Selekcija (prelazak u sledeću generaciju)}
 	Nakon $N$ ukrštanja, populacija se povećala za broj novonastale dece, i sada iznosi $2N$. S obzirom da je neophodno da kardinalnost populacije ostane ista, potrebno je izvršiti proces selekcije jedinki. Primenjuje se elitizam, gde se dopušta da 5\% najboljih iz prethodne generacije predje u sledeću. Sortiranjem populacije na osnovu ocene kvaliteta svake jedinke, u narednu generaciju prelazi prvih $N$ jedinki trenutne populacije. Naredni kod prikazuje implementaciju procesa selekcije i elitizam.\\

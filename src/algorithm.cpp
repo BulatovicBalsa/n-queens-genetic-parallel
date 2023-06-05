@@ -49,7 +49,7 @@ int fitness_score(int n, const vector<int> &individual)
     return res / 2;
 }
 
-// needs to be even
+// population size has to be even
 int get_group_size(int n, int population_size)
 {
     if (population_size <= 500)
